@@ -10,6 +10,7 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"strconv"
 )
 
 var (
@@ -93,6 +94,10 @@ func literalValue(v ast.Expr) (interface{}, error) {
 		case token.STRING:
 			l := len(i.Value)
 			return i.Value[1 : l-1], nil
+		case token.INT:
+			return strconv.ParseInt(i.Value, 0, 64)
+		case token.FLOAT:
+			return strconv.ParseFloat(i.Value, 64)
 		default:
 			return i.Value, nil
 		}

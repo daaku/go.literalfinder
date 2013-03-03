@@ -47,6 +47,44 @@ func TestBools(t *testing.T) {
 	}
 }
 
+func TestInt(t *testing.T) {
+	t.Parallel()
+	var foos []struct{ Bar int }
+	const source = `
+  package foo
+  type Foo struct { Bar int }
+  var f = &Foo{Bar: 42}
+  `
+	if err := literalfinder.Find(&foos, "Foo", "foo.go", source); err != nil {
+		t.Fatal(err)
+	}
+	if len(foos) != 1 {
+		t.Fatal("was expecting 1 instance")
+	}
+	if v := foos[0].Bar; v != 42 {
+		t.Fatalf("was expecting one got %s", v)
+	}
+}
+
+func TestFloat(t *testing.T) {
+	t.Parallel()
+	var foos []struct{ Bar float64 }
+	const source = `
+  package foo
+  type Foo struct { Bar float64 }
+  var f = &Foo{Bar: 4.2}
+  `
+	if err := literalfinder.Find(&foos, "Foo", "foo.go", source); err != nil {
+		t.Fatal(err)
+	}
+	if len(foos) != 1 {
+		t.Fatal("was expecting 1 instance")
+	}
+	if v := foos[0].Bar; v != 4.2 {
+		t.Fatalf("was expecting one got %s", v)
+	}
+}
+
 func TestNoLiterals(t *testing.T) {
 	t.Parallel()
 	var foos []struct{ Bar bool }

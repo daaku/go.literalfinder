@@ -1,4 +1,4 @@
-// Package literalfinder helps find literal in source creating instances of a
+// Package literalfinder helps find literals in source creating instances of a
 // specified struct.
 package literalfinder
 
@@ -9,7 +9,6 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"spew"
 )
 
 var (
@@ -53,8 +52,7 @@ func Find(thing string, filename string, src interface{}) ([]Instance, error) {
 	if err != nil {
 		return nil, err
 	}
-	spew.Dump(instances)
-	return nil, nil
+	return instances, nil
 }
 
 func keyValueExprMap(elts []ast.Expr) (map[string]interface{}, error) {

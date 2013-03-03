@@ -3,6 +3,7 @@
 package literalfinder
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -15,17 +16,13 @@ var (
 	errMustUseKeyValueSyntax = errors.New("must use key value value syntax")
 )
 
-type Instance struct {
-	Fields map[string]interface{}
-}
-
-func Find(thing string, filename string, src interface{}) ([]Instance, error) {
+func Find(into interface{}, thing string, filename string, src interface{}) error {
 	fset := token.NewFileSet()
 	astf, err := parser.ParseFile(fset, filename, src, parser.ParseComments)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	var instances []Instance
+	var instances []map[string]interface{}
 	exprFn := func(x ast.Expr, typ types.Type, val interface{}) {
 		t, ok := typ.(*types.NamedType)
 		if !ok {
@@ -36,23 +33,30 @@ func Find(thing string, filename string, src interface{}) ([]Instance, error) {
 		}
 		l, ok := x.(*ast.CompositeLit)
 		if !ok {
-			//panic("non literal instance")
 			return
 		}
 		fields, err := keyValueExprMap(l.Elts)
 		if err != nil {
 			panic(err)
 		}
-		instances = append(instances, Instance{Fields: fields})
+		instances = append(instances, fields)
 	}
 	context := types.Context{
 		Expr: exprFn,
 	}
 	_, err = context.Check(fset, []*ast.File{astf})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return instances, nil
+
+	encoded, err := json.Marshal(instances)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(encoded, into); err != nil {
+		return err
+	}
+	return nil
 }
 
 func keyValueExprMap(elts []ast.Expr) (map[string]interface{}, error) {

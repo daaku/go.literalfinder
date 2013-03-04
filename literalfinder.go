@@ -17,19 +17,36 @@ var (
 	errMustUseKeyValueSyntax = errors.New("must use key value value syntax")
 )
 
-func Find(into interface{}, thing string, filename string, src interface{}) error {
-	fset := token.NewFileSet()
-	astf, err := parser.ParseFile(fset, filename, src, parser.ParseComments)
+type Finder struct {
+	thing   string
+	fileSet *token.FileSet
+	files   []*ast.File
+}
+
+func NewFinder(thing string) *Finder {
+	return &Finder{
+		fileSet: token.NewFileSet(),
+		thing:   thing,
+	}
+}
+
+func (f *Finder) Add(filename string, src interface{}) error {
+	astf, err := parser.ParseFile(f.fileSet, filename, src, parser.ParseComments)
 	if err != nil {
 		return err
 	}
+	f.files = append(f.files, astf)
+	return nil
+}
+
+func (f *Finder) Find(into interface{}) error {
 	var instances []map[string]interface{}
 	exprFn := func(x ast.Expr, typ types.Type, val interface{}) {
 		t, ok := typ.(*types.NamedType)
 		if !ok {
 			return
 		}
-		if t.String() != thing {
+		if t.String() != f.thing {
 			return
 		}
 		l, ok := x.(*ast.CompositeLit)
@@ -43,9 +60,12 @@ func Find(into interface{}, thing string, filename string, src interface{}) erro
 		instances = append(instances, fields)
 	}
 	context := types.Context{
+		Error: func(err error) {
+			fmt.Println(err)
+		},
 		Expr: exprFn,
 	}
-	_, err = context.Check(fset, []*ast.File{astf})
+	_, err := context.Check(f.fileSet, f.files)
 	if err != nil {
 		return err
 	}

@@ -13,7 +13,9 @@ func TestSingleString(t *testing.T) {
   type Foo struct { Bar string }
   var f = &Foo{Bar: "one"}
   `
-	if err := literalfinder.Find(&foos, "Foo", "foo.go", source); err != nil {
+	f := literalfinder.NewFinder("Foo")
+	f.Add("foo.go", source)
+	if err := f.Find(&foos); err != nil {
 		t.Fatal(err)
 	}
 	if len(foos) != 1 {
@@ -33,7 +35,9 @@ func TestBools(t *testing.T) {
   var f = &Foo{Bar: true}
   var g = &Foo{Bar: false}
   `
-	if err := literalfinder.Find(&foos, "Foo", "foo.go", source); err != nil {
+	f := literalfinder.NewFinder("Foo")
+	f.Add("foo.go", source)
+	if err := f.Find(&foos); err != nil {
 		t.Fatal(err)
 	}
 	if len(foos) != 2 {
@@ -55,7 +59,9 @@ func TestInt(t *testing.T) {
   type Foo struct { Bar int }
   var f = &Foo{Bar: 42}
   `
-	if err := literalfinder.Find(&foos, "Foo", "foo.go", source); err != nil {
+	f := literalfinder.NewFinder("Foo")
+	f.Add("foo.go", source)
+	if err := f.Find(&foos); err != nil {
 		t.Fatal(err)
 	}
 	if len(foos) != 1 {
@@ -74,7 +80,9 @@ func TestFloat(t *testing.T) {
   type Foo struct { Bar float64 }
   var f = &Foo{Bar: 4.2}
   `
-	if err := literalfinder.Find(&foos, "Foo", "foo.go", source); err != nil {
+	f := literalfinder.NewFinder("Foo")
+	f.Add("foo.go", source)
+	if err := f.Find(&foos); err != nil {
 		t.Fatal(err)
 	}
 	if len(foos) != 1 {
@@ -92,7 +100,9 @@ func TestNoLiterals(t *testing.T) {
   package foo
   type Foo struct { Bar bool }
   `
-	if err := literalfinder.Find(&foos, "Foo", "foo.go", source); err != nil {
+	f := literalfinder.NewFinder("Foo")
+	f.Add("foo.go", source)
+	if err := f.Find(&foos); err != nil {
 		t.Fatal(err)
 	}
 	if len(foos) != 0 {

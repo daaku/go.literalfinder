@@ -41,6 +41,7 @@ func (f *Finder) Add(filename string, src interface{}) error {
 
 func (f *Finder) Find(into interface{}) error {
 	var instances []map[string]interface{}
+	var retErr error
 	exprFn := func(x ast.Expr, typ types.Type, val interface{}) {
 		t, ok := typ.(*types.NamedType)
 		if !ok {
@@ -55,19 +56,23 @@ func (f *Finder) Find(into interface{}) error {
 		}
 		fields, err := keyValueExprMap(l.Elts)
 		if err != nil {
-			panic(err)
+			retErr = err
+			return
 		}
 		instances = append(instances, fields)
 	}
 	context := types.Context{
 		Error: func(err error) {
-			fmt.Println(err)
+			retErr = err
 		},
 		Expr: exprFn,
 	}
 	_, err := context.Check(f.fileSet, f.files)
 	if err != nil {
 		return err
+	}
+	if retErr != nil {
+		return retErr
 	}
 
 	encoded, err := json.Marshal(instances)

@@ -123,8 +123,6 @@ func literalValue(v ast.Expr) (interface{}, error) {
 			return strconv.ParseInt(i.Value, 0, 64)
 		case token.FLOAT:
 			return strconv.ParseFloat(i.Value, 64)
-		default:
-			return i.Value, nil
 		}
 	}
 	return nil, fmt.Errorf("unknown value type: %T", v)

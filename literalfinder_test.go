@@ -140,3 +140,17 @@ func TestInvalidNonLiteral(t *testing.T) {
 		t.Fatal("was expecting error")
 	}
 }
+
+func TestSurfaceTypeCheckError(t *testing.T) {
+	t.Parallel()
+	var foos []struct{ Bar string }
+	const source = `
+  package foo
+  var f = &Foo{Bar: s}
+  `
+	f := literalfinder.NewFinder("Foo")
+	f.Add("foo.go", source)
+	if err := f.Find(&foos); err == nil {
+		t.Fatal("was expecting error")
+	}
+}

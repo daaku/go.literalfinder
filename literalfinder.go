@@ -10,13 +10,13 @@
 package literalfinder
 
 import (
+	"code.google.com/p/go.exp/go/types"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"go/types"
 	"strconv"
 )
 
